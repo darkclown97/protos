@@ -1,0 +1,86 @@
+syntax = "proto3";
+package services.tracks;
+
+option go_package = "github.com/darkclown97/api/services/tracks";
+
+import "services/common.proto";
+
+service SoundtrackService {
+  rpc AddSoundtrack(AddSoundtrackRequest) returns (AddSoundtrackResponse);
+  rpc ListSoundtracks(ListSoundtracksRequest) returns (ListSoundtracksResponse);
+  rpc DeleteSoundtrack(DeleteSoundtrackRequest) returns (DeleteSoundtrackResponse);
+  rpc UpdateSoundtrack(UpdateSoundtrackRequest) returns (UpdateSoundtrackResponse);
+  rpc GetSoundtrack(GetSoundtrackRequest) returns (GetSoundtrackResponse);
+
+  rpc GetMovieSoundtracks(GetMovieSoundtrackRequest) returns (GetMovieSoundtrackResponse);
+}
+
+message Soundtrack {
+  common.Meta meta = 1;
+  string name = 2;
+  string artist = 3;
+  int32 year = 4;
+  repeated string features_in = 5;
+}
+
+message AddSoundtrackRequest {
+  Soundtrack soundtrack = 1;
+}
+
+message AddSoundtrackResponse {
+  Soundtrack soundtrack = 1;
+}
+
+message ListSoundtracksRequest {
+  enum FilterBy {
+    NAME = 0; // by default, filters by name
+    ARTIST = 1;
+    YEAR = 2;
+    MOVIE = 3;
+  }
+
+  common.PageOptions options = 1;
+  string search_term = 2;
+  FilterBy filter_by = 3;
+  bool include_deleted = 4;
+}
+
+message ListSoundtracksResponse {
+  repeated Soundtrack soundtracks = 1;
+}
+
+message DeleteSoundtrackRequest {
+  oneof params {
+    string id = 1;
+    string name = 2;
+  }
+}
+
+message DeleteSoundtrackResponse {}
+
+message UpdateSoundtrackRequest {
+  Soundtrack soundtrack = 1;
+}
+
+message UpdateSoundtrackResponse {
+  Soundtrack soundtrack = 1;
+}
+
+message GetSoundtrackRequest {
+  oneof params {
+    string id = 1;
+    string name = 2;
+  }
+}
+
+message GetSoundtrackResponse {
+  Soundtrack soundtrack = 1;
+}
+
+message GetMovieSoundtrackRequest {
+  string movie_id = 1;
+}
+
+message GetMovieSoundtrackResponse {
+  repeated Soundtrack soundtracks = 1;
+}

@@ -1,0 +1,38 @@
+name: Generate Code and Push to API Repo
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger only when a tag matching 'v*' is pushed
+
+jobs:
+  generate_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the current repository
+    - name: Checkout source repository
+      uses: actions/checkout@v3
+
+    # 2. Set up the environment (e.g., install dependencies or tools)
+    - name: Set up Protobuf compiler
+      run: |
+        sudo apt update
+        sudo apt install -y protobuf-compiler
+        protoc --version
+
+    # 3. Generate the code
+    - name: Generate code
+      run: |
+        chmod +x ./deploy/generate.sh  # Ensure the script is executable
+        ./deploy/generate.sh           # Run the script
+
+    # 4. Push the generated code to another repository
+    - name: Clone & Push to api repository
+      run: |
+        chmod +x ./deploy/move_generated_code.sh  # Ensure the script is executable
+        ./deploy/move_generated_code.sh           # Run the script
+      env:
+        GITHUB_USER_NAME: ${{ secrets.GITHUB_USER_NAME }}
+        GITHUB_USER_EMAIL: ${{ secrets.GITHUB_USER_EMAIL }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        

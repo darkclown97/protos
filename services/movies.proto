@@ -1,0 +1,74 @@
+syntax = "proto3";
+package services.movies;
+
+option go_package = "github.com/darkclown97/api/services/movies";
+
+import "services/common.proto";
+
+service MovieService {
+  rpc ListMovies (ListMoviesRequest) returns (ListMoviesResponse);
+  rpc AddMovie(AddMovieRequest) returns (AddMovieResponse);
+  rpc DeleteMovie(DeleteMovieRequest) returns (DeleteMovieResponse);
+  rpc UpdateMovie(UpdateMovieRequest) returns (UpdateMovieResponse);
+  rpc GetMovie(GetMovieRequest) returns (GetMovieResponse);
+}
+
+message Movie {
+  common.Meta meta = 1;
+  string name = 2;
+  string genre = 3;
+  int32 year = 4;
+}
+
+message ListMoviesRequest {
+  enum FilterBy {
+    NAME = 0; // by default, filters by name
+    GENRE = 1;
+    YEAR = 2;
+  }
+
+  common.PageOptions options = 1;
+  string search_term = 2;
+  FilterBy filter_by = 3;
+  bool include_deleted = 4;
+}
+
+message ListMoviesResponse {
+  repeated Movie movies = 1;
+}
+
+message AddMovieRequest {
+  Movie movie = 1;
+}
+
+message AddMovieResponse {
+  Movie movie = 1;
+}
+
+message DeleteMovieRequest {
+  oneof params {
+    string id = 1;
+    string name = 2;
+  }
+}
+
+message DeleteMovieResponse {}
+
+message UpdateMovieRequest {
+  Movie movie = 1;
+}
+
+message UpdateMovieResponse {
+  Movie movie = 1;
+}
+
+message GetMovieRequest {
+  oneof params {
+    string id = 1;
+    string name = 2;
+  }
+}
+
+message GetMovieResponse {
+  Movie movie = 1;
+}
