@@ -1,0 +1,12 @@
+syntax = "proto3";
+package common.users;
+
+option go_package = "github.com/darkclown97/api/common";
+
+import "common/messages.proto";
+
+message DcUser {
+  common.messages.Meta meta = 1;
+  string name = 2;
+  string email = 3;
+}

@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package services.ecommerce.v1.gateway;
+
+import "common/messages.proto";
+import "services/ecommerce/v1/products.proto";
+import "services/ecommerce/v1/orders.proto";
+
+option go_package = "github.com/darkclown97/api/services/ecommerce/v1/gateway";
+
+service SellerGateway {
+  // Product-related APIs
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+  rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (UpdateProductResponse);
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+
+  // Order-related APIs
+  rpc ListOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc GetOrders (GetOrdersRequest) returns (GetOrdersResponse);
+}
+
+message ListProductsRequest {
+  enum SortBy {
+    NAME = 0;
+    PRICE = 1;
+    POPULARITY = 2;
+    RATING = 3;
+  }
+  common.messages.PageOptions page_options = 1;
+  SortBy sort_by = 2;
+  string search_term = 3;
+  repeated string tags = 4;
+}
+
+message ListProductsResponse {
+  repeated products.Product products = 1;
+  int32 total = 2;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message GetProductResponse {
+  products.Product detail = 1;
+}
+
+message CreateProductRequest {
+  products.Product product = 1;
+}
+
+message CreateProductResponse {
+  products.Product product = 1;
+}
+
+message UpdateProductRequest {
+  products.Product product = 1;
+}
+
+message UpdateProductResponse {
+  products.Product product = 1;
+}
+
+message DeleteProductRequest {
+  string product_id = 1;
+}
+
+message DeleteProductResponse {}
+
+message ListOrdersRequest {
+  common.messages.PageOptions page_options = 1;
+  string search_term = 2;
+}
+
+message ListOrdersResponse {
+  repeated orders.Order orders = 1; // List of orders
+  int32 total_orders = 2; // Total number of orders matching the criteria
+}
+
+message GetOrdersRequest {
+  string order_id = 1;
+}
+
+message GetOrdersResponse {
+  orders.Order detail = 1;
+}
