@@ -1,0 +1,31 @@
+syntax = "proto3";
+package common.messages;
+
+option go_package = "github.com/darkclown97/api/common";
+
+import "google/protobuf/timestamp.proto";
+
+enum SortOrder {
+  SORT_ORDER_ASC = 0; // ascending by default
+  SORT_ORDER_DESC = 1;
+}
+
+message PageOptions {
+  uint32 page = 1;
+  uint32 limit = 2;
+  SortOrder sort_order = 3;
+}
+
+message ListOptions {
+  uint32 limit = 1;
+  uint32 offset = 2;
+  SortOrder sort_order = 3;
+}
+
+message Meta {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp deleted_at = 4;
+  bool is_deleted = 5;
+}

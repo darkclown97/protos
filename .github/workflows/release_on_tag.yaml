@@ -1,0 +1,55 @@
+name: Generate Code and Push to API Repo
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger only when a tag matching 'v*' is pushed
+
+jobs:
+  generate_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the current repository
+    - name: Checkout source repository
+      uses: actions/checkout@v3
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '>=1.23.0'    
+    -  run: |
+        go version
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+        go install github.com/twitchtv/twirp/protoc-gen-twirp@latest
+        which protoc-gen-go
+        which protoc-gen-go-grpc
+
+    # 2. Set up the environment (e.g., install dependencies or tools)
+    - name: Set up Protobuf compiler
+      run: |
+        sudo apt update
+        sudo apt install -y protobuf-compiler
+        # Install protoc-gen-grpc-web
+        GRPC_WEB_VERSION=1.4.2
+        curl -Lo /usr/local/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/$GRPC_WEB_VERSION/protoc-gen-grpc-web-$GRPC_WEB_VERSION-linux-x86_64
+        chmod +x /usr/local/bin/protoc-gen-grpc-web
+        python -m pip install grpcio grpcio-tools
+        npm install -g ts-proto
+        protoc --version
+
+    # 3. Generate the code
+    - name: Generate code
+      run: |
+        chmod +x ./deploy/generate.sh  # Ensure the script is executable
+        ./deploy/generate.sh           # Run the script
+
+    # 4. Push the generated code to another repository
+    - name: Clone & Push to api repository
+      run: |
+        chmod +x ./deploy/move_generated_code.sh  # Ensure the script is executable
+        ./deploy/move_generated_code.sh           # Run the script
+      env:
+        REPO_USER_NAME: ${{ secrets.REPO_USER_NAME }}
+        REPO_USER_EMAIL: ${{ secrets.REPO_USER_EMAIL }}
+        REPO_TOKEN: ${{ secrets.REPO_TOKEN }}        

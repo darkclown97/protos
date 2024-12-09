@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package services.ecommerce.v1.gateway;
+
+import "common/messages.proto";
+import "services/ecommerce/v1/products.proto";
+import "services/ecommerce/v1/orders.proto";
+import "services/ecommerce/v1/payments.proto";
+
+option go_package = "github.com/darkclown97/api/services/ecommerce/v1/gateway";
+
+service BuyerGateway {
+  // Product-related APIs
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+
+  // Cart-related APIs  
+  rpc AddToCart(AddToCartRequest) returns (AddToCartResponse);
+  rpc RemoveFromCart(RemoveFromCartRequest) returns (RemoveFromCartResponse);
+  rpc ClearCart(ClearCartRequest) returns (ClearCartResponse);
+  rpc ViewCart(ViewCartRequest) returns (ViewCartResponse);
+
+  // Order-related APIs  
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+  rpc ListOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc GetOrders (GetOrdersRequest) returns (GetOrdersResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message ListProductsRequest {
+  common.messages.PageOptions page_options = 1;
+  products.ProductSortBy sort_by = 2;
+  string search_term = 3;
+  repeated string categories = 4;
+}
+
+message ListProductsResponse {
+  repeated products.Product products = 1;
+  int32 total = 2;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message GetProductResponse {
+  products.Product detail = 1;
+}
+
+
+message AddToCartRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message AddToCartResponse {
+  int32 total_cart_products = 1;
+}
+
+message RemoveFromCartRequest {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message RemoveFromCartResponse {
+  int32 total_cart_products = 1;
+}
+
+message ClearCartRequest {}
+
+message ClearCartResponse {}
+
+message ViewCartRequest {}
+
+message ViewCartResponse {
+  repeated products.Product products = 1;
+  int32 total_cart_products = 2;
+}
+
+message CreateOrderRequest {
+  oneof order_methods {
+    string cart_id = 1; // Cart ID for orders with multiple items
+    orders.OrderItem item = 2; // Single item purchase (instant buy)
+  }
+
+  string shipping_address = 3; // Address for shipping
+  string billing_address = 4; // Address for billing (if different)
+  bool same_as_shipping_address = 5;
+  payments.PaymentMethod payment_method = 6; // Payment method - credit card, upi, etc.
+}
+
+message CreateOrderResponse {
+  string order_id = 1;
+  orders.OrderStatus status = 2;
+  payments.PaymentStatus payment_status = 3; // Payment status - initiated, pending, fulfilled, failed
+}
+
+message ListOrdersRequest {
+  common.messages.PageOptions page_options = 1;
+  string search_term = 2;
+}
+
+message ListOrdersResponse {
+  repeated orders.Order orders = 1; // List of orders
+  int32 total_orders = 2; // Total number of orders matching the criteria
+}
+
+message GetOrdersRequest {
+  string order_id = 1;
+}
+
+message GetOrdersResponse {
+  orders.Order detail = 1;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message CancelOrderResponse {}

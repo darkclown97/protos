@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package services.ecommerce.v1.products;
+
+import "common/messages.proto";
+
+option go_package = "github.com/darkclown97/api/services/ecommerce/v1/products";
+
+service ProductService {
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse);
+  rpc CreateProduct (CreateProductRequest) returns (Product);
+  rpc UpdateProduct (Product) returns (Product);
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+enum ProductSortBy {
+  PRODUCT_SORTBY_NAME = 0;
+  PRODUCT_SORTBY_PRICE = 1;
+  PRODUCT_SORTBY_POPULARITY = 2;
+  PRODUCT_SORTBY_RATING = 3;
+}
+
+message ListProductsRequest {
+  common.messages.PageOptions page_options = 1;
+  ProductSortBy sort_by = 2;
+  string search_term = 3;
+  repeated string categories = 4;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  int32 total = 2;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message GetProductResponse {
+  Product detail = 1;
+}
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string brief = 4;
+  double price = 5;
+  bool in_stock = 6;
+  repeated string image_url = 7;
+  Seller seller = 8;
+  double star_rating = 9;
+  int32 rating_count = 10;
+}
+
+message Seller {
+  string seller_id = 1;
+  string name = 2;
+}
+
+message CreateProductRequest {
+  Product product = 1;
+}
+
+message DeleteProductRequest {
+  string product_id = 1;
+}
+
+message DeleteProductResponse {}
+
+// Only for internal use
+message ProductInternal {
+  common.messages.Meta meta = 1;
+  string name = 2;
+  string description = 3;
+  Seller seller = 4;
+  string brief = 5;
+  double price = 6;
+  bool in_stock = 7;
+  repeated string image_url = 8;
+  double star_rating = 9;
+  int32 rating_count = 10;
+}

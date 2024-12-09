@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package services.ecommerce.v1.orders;
+
+import "common/messages.proto";
+import "google/protobuf/timestamp.proto";
+import "services/ecommerce/v1/payments.proto";
+import "services/ecommerce/v1/products.proto";
+
+option go_package = "github.com/darkclown97/api/services/ecommerce/v1/orders";
+
+service OrderService {
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+  rpc ListBuyerOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc ListSellerOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc GetBuyerOrders (GetOrdersRequest) returns (GetOrdersResponse);
+  rpc GetSellerOrders (GetOrdersRequest) returns (GetOrdersResponse);
+
+  rpc UpdateOrderPayment(UpdateOrderPaymentRequest) returns (UpdateOrderPaymentResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message OrderItem {
+  string product_id = 1; // Product ID
+  string name = 2; // Product name
+  int32 quantity = 3; // Quantity of the product
+  double price = 4; // Price per item
+
+  products.Seller seller = 5;
+}
+
+message CreateOrderRequest {
+  oneof order_methods {
+    string cart_id = 1; // Cart ID for orders with multiple items
+    OrderItem item = 2; // Single item purchase (instant buy)
+  }
+
+  string shipping_address = 3; // Address for shipping
+  string billing_address = 4; // Address for billing (if different)
+  bool same_as_shipping_address = 5;
+  payments.PaymentMethod payment_method = 6; // Payment method - credit card, upi, etc.
+}
+
+enum OrderStatus {
+  ORDER_STATUS_CREATED = 0;
+  ORDER_STATUS_CANCELED = 1;
+  ORDER_STATUS_CONFIRMED = 2;
+  ORDER_STATUS_PACKED = 3;
+  ORDER_STATUS_SHIPPED = 4;
+  ORDER_STATUS_DELIVERED = 5;
+  ORDER_STATUS_COMPLETED = 6;
+}
+
+message CreateOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  payments.PaymentStatus payment_status = 3; // Payment status - initiated, pending, fulfilled, failed
+}
+
+message ListOrdersRequest {
+  common.messages.PageOptions page_options = 1;
+  string search_term = 2;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1; // List of orders
+  int32 total_orders = 2; // Total number of orders matching the criteria
+}
+
+message Order {
+  string order_id = 1; // Unique identifier for the order
+  repeated OrderItem items = 2; // List of items in the order
+  string shipping_address = 3; // Shipping address for the order
+  string billing_address = 4; // Billing address for the order
+  bool same_as_shipping_address = 5; // Flag indicating if billing address is the same as shipping address
+  OrderStatus status = 6; // Order status (e.g., pending, shipped, completed)
+  int32 total_price = 7; // Total price of the order
+  payments.PaymentMethod payment_method = 8; // Payment method (e.g., credit card, upi, etc.)
+  payments.PaymentStatus payment_status = 9; // Payment status (e.g., successful, failed)
+  google.protobuf.Timestamp created_at = 10; // Timestamp when the order was created
+  google.protobuf.Timestamp delivered_at = 11; // Timestamp when the order was delivered
+}
+
+message GetOrdersRequest {
+  string order_id = 1;
+}
+
+message GetOrdersResponse {
+  Order detail = 1;
+}
+
+message UpdateOrderPaymentRequest {
+  string order_id = 1;
+  string payment_id = 2;
+  payments.PaymentStatus payment_status = 3;
+}
+
+message UpdateOrderPaymentResponse {}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message CancelOrderResponse {}
+
+
+// Only for internal use
+message OrderInternal {
+  common.messages.Meta meta = 1;
+  string buyer_id = 2; // Buyer reference (user ID)
+  repeated OrderItem items = 3; // List of items in the order
+  string shipping_address = 4; // Shipping address for the order
+  string billing_address = 5; // Billing address for the order
+  bool same_as_shipping_address = 6; // Flag indicating if billing address is the same as shipping address
+  int32 total_price = 7; // Total price of the order
+  OrderStatus order_status = 8; // Order status (e.g., 'pending', 'shipped', 'delivered')
+  repeated payments.Payment payment = 9; // List of payment attempts
+  google.protobuf.Timestamp delivered_at = 10; // Timestamp when the order was delivered
+}

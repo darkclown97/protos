@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+import "common/messages.proto";
+package services.ecommerce.v1.payments;
+
+option go_package = "github.com/darkclown97/api/services/ecommerce/v1/payments";
+
+service PaymentService {
+  rpc InitiatePayment (InitiatePaymentRequest) returns (InitiatePaymentResponse);
+  rpc UpdatePaymentStatus (UpdatePaymentStatusRequest) returns (UpdatePaymentStatusResponse);
+  rpc InitiateRefund (InitiateRefundRequest) returns (InitiateRefundResponse);
+}
+
+enum PaymentMethod {
+  UPI = 0;
+  CREDIT_CARD = 1;
+  DEBIT_CARD = 2;
+  NET_BANKING = 3;
+  PAY_ON_DELIVERY = 4;
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_INITIATED = 0; // On initiating payment
+  PAYMENT_STATUS_PENDING = 1; // On payment with payment gateway / bank
+  PAYMENT_STATUS_FULFILLED = 2; // On payment received
+  PAYMENT_STATUS_FAILED = 3; // On payment failure
+  PAYMENT_STATUS_REFUND_INITIATED = 4; // On order cancellation / damaged product
+  PAYMENT_STATUS_REFUND_PENDING = 5; // On refund payment with payment gateway / bank
+  PAYMENT_STATUS_REFUND_FULFILLED = 6; // On refund payment success
+}
+
+message Payment {
+  common.messages.Meta meta = 1;
+  PaymentMethod payment_method = 3;
+  PaymentStatus status = 2;
+}
+
+message InitiatePaymentRequest {
+  string order_id = 1;
+  double amount = 2;
+  PaymentMethod payment_method = 3;
+}
+
+message InitiatePaymentResponse {
+  string payment_id = 1;
+}
+
+message UpdatePaymentStatusRequest {
+  string payment_id = 1;
+  PaymentStatus status = 2;
+}
+
+message UpdatePaymentStatusResponse {}
+
+message InitiateRefundRequest {
+  string order_id = 1;
+  string product_id = 2;
+  string seller_id = 3;
+  int32 quantity = 4;
+  double amount = 5;
+}
+
+message InitiateRefundResponse {}
+
+// Only for internal use
+message PaymentInternal {
+  common.messages.Meta meta = 1;
+  string order_id = 2;
+  string product_id = 3;
+  string seller_id = 4;
+  int32 quantity = 5;
+  double amount = 6;
+  PaymentMethod payment_method = 7;
+  PaymentStatus status = 8;
+}
